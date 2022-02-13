@@ -1,48 +1,38 @@
 package org.launchcode.hellospring.controllers;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.AttributedString;
+import java.util.ArrayList;
+import java.util.List;
+
 @Controller
-@ResponseBody // If every method in your class will take a response body, but it at the top of your class
-@RequestMapping("/hello")// Says every single method within this class should begin with /hello
+ // If every method in your class will take a response body, but it at the top of your class
 public class HelloController {
 
-    //Handles request at path/hello
-//   @GetMapping("hello")
-//   @ResponseBody
-//   public String hello(){
-//       return "Goodbye, Spring!";
-//   }
-
-
-    //lives at /hello/goodbye
-    @GetMapping("goodbye")
-    public String goodbye() {
-        return "Goodbye, Spring!";
-    }
-
     //Handles request of the form/hello?name=LaunchCode (used to be  @GetMapping("hello/{name}")
-    //the current @RequestMapping handles get and post requests at the same time
-    //This is dynamic Handler which means it accepts data
-    //lives at /hello/hello
     @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST}, value = "hello")
-    public String helloWithQueryParam(@RequestParam String name) {
-        return "Hello " + name + "!";
+    public String hello(@RequestParam String name, Model model) {
+        String thegreeting = "Hello, " + name + "!";
+        model.addAttribute("greeting",thegreeting);
+        return "hello";
     }
 
     //Handles requests of the form /hello/LaunchCode
-    // Used to say @GetMapping("hello/{name}") changed @GetMapping since we added it to the top of the class
-//    @GetMapping("{name}")
-//    public String helloWithPathParam(@PathVariable String name) {
-//        return"Hello, "+name +"!";
-//    }
+    @GetMapping("hello/{name}")
+    public String helloAgain(@PathVariable String name, Model model) {
+        String theGreeting = "Hello, "+name +"!";
+        model.addAttribute("greeting",theGreeting);
+        return "hello";
+    }
 
     //returns a message based off of the language that is selected
-    @GetMapping(value = "", method = RequestMethod.POST)
+    @RequestMapping(value = "hello", method = RequestMethod.POST)
     public static String createMessage(@RequestParam String name,@RequestParam String language) {
         String greeting="";
-        if (name== null){
+        if (name.equals("")){
             greeting = "World";
         }else if (language.equals("English")){
             greeting= "Hello There, ";
@@ -52,31 +42,30 @@ public class HelloController {
             greeting= "Hallo mein Freund, ";
         } else if (language.equals("Spanish")){
             greeting= "Hola mi amiga/o, ";
-        } else if (language.equals("Swedish")){
-            greeting= "Hej min vän, ";
-
+        } else if (language.equals("Swedish")) {
+            greeting = "Hej min vän, ";
+        }
 
         return greeting + name +"!";
     }
 
     ///This form works because we already have a handler method created that accepts "name" and tells it what to do with "name"
    //Lives at /hello/form
-    @GetMapping(value="form", method = {RequestMethod.GET})
+    @GetMapping("form")
     public String helloForm(){
-        return"<html>" +
-                "<body>" +
-                "<form action= 'hello' method='post'>" + // submit a request to /hello
-                "<input type='text' name='name'>" +
-                "<select name='language' id='language'> " +
-                "<option value='English'> English </option>" +
-                "<option value='French'> French </option>" +
-                "<option value='German'> German </option>" +
-                "<option value='Spanish'> Spanish </option>" +
-                "<option value='Swedish'> Swedish </option>" +
-                "</select>" +
-                "<input type='submit' value='Greet me!'>" +
-                "</form>" +
-                "</body>" +
-                "</html>";
+        return "form";
+    }
+
+    //to Pass this list of names into the template you need a model object
+    @GetMapping("hello-names")
+    public String helloNames(Model model){
+        List<String> names = new ArrayList<>();
+        names.add("LaunchCode");
+        names.add("Java");
+        names.add("JavaScript");
+        //the 1st argument is the value the template will see the 2nd argument is the value the variable should have
+        model.addAttribute("names",names);
+        return "hello-list";
+
     }
 }
